@@ -1,45 +1,17 @@
+# PUBG Machine Learning
+# training script
+# Imports the pre-split data and trains/tests a model. Exports models to models directory. Be sure to rename the
+# exported model on line 79
 
-import matplotlib.pyplot as plt
-from sklearn import model_selection, ensemble, metrics
+# imports
+from sklearn import ensemble, metrics
 import pandas as pd
 import joblib
 import numpy as np
+import os
 
-
-# importing data
-x=pd.read_csv('x_data.csv')
-y=pd.read_csv('y_data.csv')
-
-x=x.drop(x.columns[0], axis=1)
-y=y.drop(y.columns[0], axis=1)
-
-# cleaning
-x = x.astype(np.int)
-y = y.astype(np.int)
-
-# converting to numppy array
-x = x.to_numpy()
-y = y.to_numpy()
-
-y=np.ravel(y)
-
-print(x.shape)
-print(y.shape)
-
-#randomizing traning and testing data
-
-x_train, x_test, y_train,y_test = model_selection.train_test_split(x,y,test_size=.3)
-
-x_test_pd=pd.DataFrame(x_test)
-y_test_pd=pd.DataFrame(y_test)
-
-x_test_pd.to_csv('x_test_data.csv')
-y_test_pd.to_csv('y_test_data.csv')
-
-print('Data set. Training model.')
-
-#training the model
-
+# Model Utilized =======================================================================================================
+# exchange for other models in the SK learn library as necessary
 model = ensemble.GradientBoostingRegressor(n_estimators=10000,
                                               learning_rate=0.1,
                                               max_depth=4,
@@ -47,12 +19,68 @@ model = ensemble.GradientBoostingRegressor(n_estimators=10000,
                                               max_features=0.1,
                                               loss='huber')
 
+# importing train data =================================================================================================
+# setting dir
+os.chdir(r'.\cleaned_data')
+
+# retrieval
+x_train=pd.read_csv(r'x_train_data.csv')
+y_train=pd.read_csv('y_train_data.csv')
+
+x_train=x_train.drop(x_train.columns[0], axis=1)
+y_train=y_train.drop(y_train.columns[0], axis=1)
+
+# cleaning
+x_train = x_train.astype(np.int)
+y_train = y_train.astype(np.int)
+
+# converting to numppy array
+x_train = x_train.to_numpy()
+y_train = y_train.to_numpy()
+
+y_train=np.ravel(y_train)
+
+# importing test data ==================================================================================================
+x_test=pd.read_csv('x_test_data.csv')
+y_test=pd.read_csv('y_test_data.csv')
+
+x_test=x_test.drop(x_test.columns[0], axis=1)
+y_test=y_test.drop(y_test.columns[0], axis=1)
+
+# cleaning
+x_test = x_test.astype(np.int)
+y_test = y_test.astype(np.int)
+
+# converting to numppy array
+x_test = x_test.to_numpy()
+y_test = y_test.to_numpy()
+
+y_test=np.ravel(y_test)
+
+print('Data set. Training model.')
+print(x_train.shape)
+print(y_train.shape)
+print(x_test.shape)
+print(y_test.shape)
+
+# training the model ===================================================================================================
+
 model.fit(x_train,y_train)
 
-# saving the model
+# saving the model =====================================================================================================
 
-joblib.dump(model,'model.joblib')
+os.chdir(os.path.dirname(os.getcwd()))
 
+try:
+    os.chdir(r'./models')
+except:
+    os.mkdir(r'./models')
+    os.chdir(r'./models')
+
+# RENAME MODEL FOR EACH MODEL USED
+joblib.dump(model,'gradient_boosting_model.joblib')
+
+# Evaluating ===========================================================================================================
 mse = metrics.mean_absolute_error(y_test, model.predict(x_test))
 
 print(mse)

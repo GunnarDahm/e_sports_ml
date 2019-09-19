@@ -1,13 +1,16 @@
 # PUBG Machine Learning
-# Ultimate purpose is to determine the placement of each player in a match
+# Import script
+# Imports, chunks, splits, and then saves the data for training purposes
 
 # imports
 import pandas as pd
 import numpy as np
+from sklearn import model_selection
+import os
 
-
-# parameters ==========================================================================================================
+# parameters ===========================================================================================================
 #attributes for all data points pulled, y is always the last value listed
+#subset filters the applicable instances (e.g. solo matches, duos, team)
 #subset for filtering, currently set to matchtype
 
 attributes =['kills','headshotKills','heals','damageDealt','DBNOs','walkDistance','winPlacePerc']
@@ -26,7 +29,7 @@ predictors=len(attributes)-1
 #         'walkDistance':float,'weaponsAcquired':int,'winPoints':int,'groupID':int,
 #         'numGroups':int,'maxPlace':int,'winPlacePerc':float}
 
-#Chunking==============================================================================================================
+# Chunking =============================================================================================================
 
 train_data= pd.read_csv(r'.\pubg-finish-placement-prediction\train_V2.csv',chunksize=100000)
 
@@ -46,15 +49,50 @@ y=data[attributes[-1]].to_frame()
 #bucketing by groups of 5
 #y['winPlaceInt']=(y['winPlacePerc']*100)-((y['winPlacePerc']*100)%5)
 
-#converting to ints
+#converting to ints, seeing as their stored as floats for some reason
 y['winPlaceInt']=(y['winPlacePerc']*100)
 
 x.dropna()
 y.dropna()
 
+# saving raw csv========================================================================================================
+try:
+    os.chdir(r'./cleaned_data')
+except:
+    os.mkdir(r'./cleaned_data')
+    os.chdir(r'./cleaned_data')
+
+x.to_csv('x_data.csv')
+y.to_csv('y_data.csv')
+
+# Splitting into test and train ========================================================================================
 y=y.drop(columns=['winPlacePerc'])
 y=y.astype(int)
 
-# saving csv============================================================================================================
-x.to_csv('x_data.csv')
-y.to_csv('y_data.csv')
+# setting type
+x = x.astype(np.int)
+y = y.astype(np.int)
+
+# converting to numppy array to allow for auto splitting
+x = x.to_numpy()
+y = y.to_numpy()
+
+y=np.ravel(y)
+
+print(x.shape)
+print(y.shape)
+#splitting
+x_train, x_test, y_train,y_test = model_selection.train_test_split(x,y,test_size=.3)
+
+# Saving split to csv files ============================================================================================
+x_train_pd=pd.DataFrame(x_train, columns=attributes[:predictors])
+y_train_pd=pd.DataFrame(y_train, columns=[attributes[-1]])
+
+x_train_pd.to_csv('x_train_data.csv')
+y_train_pd.to_csv('y_train_data.csv')
+
+x_test_pd=pd.DataFrame(x_test, columns=attributes[:predictors])
+y_test_pd=pd.DataFrame(y_test, columns=[attributes[-1]])
+
+x_test_pd.to_csv('x_test_data.csv')
+y_test_pd.to_csv('y_test_data.csv')
