@@ -9,14 +9,14 @@ from sklearn import model_selection
 import os
 
 # parameters ===========================================================================================================
-#attributes for all data points pulled, y is always the last value listed
+#features for all data points pulled, y is always the last value listed
 #subset filters the applicable instances (e.g. solo matches, duos, team)
 #subset for filtering, currently set to matchtype
 
-attributes =['kills','headshotKills','heals','damageDealt','DBNOs','walkDistance','winPlacePerc']
+features =['kills','headshotKills','heals','damageDealt','DBNOs','walkDistance','winPlacePerc']
 subset='solo'
 
-predictors=len(attributes)-1
+predictors=len(features)-1
 # types dictionary
 
 #types ={'kills':np.int64,'headshotKills':np.int64,'walkDistance':np.int64}
@@ -37,14 +37,14 @@ data = pd.DataFrame()
 
 for chunk in train_data:
     chunk = chunk[chunk.matchType==subset]
-    chunk = chunk[attributes]
+    chunk = chunk[features]
     data=pd.concat([data,chunk])
 
 # pre-cleaning==========================================================================================================
 
 #splitting data into x and y
-x=data[attributes[:predictors]]
-y=data[attributes[-1]].to_frame()
+x=data[features[:predictors]]
+y=data[features[-1]].to_frame()
 
 #bucketing by groups of 5
 #y['winPlaceInt']=(y['winPlacePerc']*100)-((y['winPlacePerc']*100)%5)
@@ -85,14 +85,14 @@ print(y.shape)
 x_train, x_test, y_train,y_test = model_selection.train_test_split(x,y,test_size=.3)
 
 # Saving split to csv files ============================================================================================
-x_train_pd=pd.DataFrame(x_train, columns=attributes[:predictors])
-y_train_pd=pd.DataFrame(y_train, columns=[attributes[-1]])
+x_train_pd=pd.DataFrame(x_train, columns=features[:predictors])
+y_train_pd=pd.DataFrame(y_train, columns=[features[-1]])
 
 x_train_pd.to_csv('x_train_data.csv')
 y_train_pd.to_csv('y_train_data.csv')
 
-x_test_pd=pd.DataFrame(x_test, columns=attributes[:predictors])
-y_test_pd=pd.DataFrame(y_test, columns=[attributes[-1]])
+x_test_pd=pd.DataFrame(x_test, columns=features[:predictors])
+y_test_pd=pd.DataFrame(y_test, columns=[features[-1]])
 
 x_test_pd.to_csv('x_test_data.csv')
 y_test_pd.to_csv('y_test_data.csv')
