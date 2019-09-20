@@ -62,11 +62,7 @@ y_test = y_test.to_numpy()
 
 y_test = np.ravel(y_test)
 
-print('Data set. Training model.')
-print(x_train.shape)
-print(y_train.shape)
-print(x_test.shape)
-print(y_test.shape)
+print('Data set, training model.')
 
 # training the model ===================================================================================================
 
@@ -86,6 +82,7 @@ except:
 joblib.dump(model, (model_name + '.joblib'))
 
 # Evaluating ===========================================================================================================
-mse = metrics.mean_absolute_error(y_test, model.predict(x_test))
+mse = metrics.mean_absolute_error(y_train, model.predict(x_train))
 
-print(mse)
+print('Mean Squared Error: ',mse)
+

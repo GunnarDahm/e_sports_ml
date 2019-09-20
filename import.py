@@ -81,6 +81,7 @@ y=np.ravel(y)
 
 print(x.shape)
 print(y.shape)
+
 #splitting
 x_train, x_test, y_train,y_test = model_selection.train_test_split(x,y,test_size=.3)
 
